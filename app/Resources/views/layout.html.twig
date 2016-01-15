@@ -17,11 +17,13 @@
       <h1>Ma plateforme d'annonces</h1>
     </div>
 {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
-    Connecté en tant que {{ app.user.username }}
+    Bienvenue {{ app.user.username }}
     -
-    <a href="{{ path('fos_user_security_logout') }}">Déconnexion</a>
+    <a href="{{ path('fos_user_security_logout') }}">Se déconnecter</a>
 {% else %}
-    <a href="{{ path('fos_user_security_login') }}">Connexion</a>
+    <a href="{{ path('fos_user_registration_register') }}">Créer un compte</a>
+    <br />
+    <a href="{{ path('fos_user_security_login') }}">Se connecter</a>
 {% endif %}
     <div class="row">
       <div id="menu" class="col-md-3">

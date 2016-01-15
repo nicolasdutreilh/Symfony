@@ -9,6 +9,9 @@ oc_platform:
     requirements:
         _locale: en|fr # les locales disponibles, séparées par des pipes « | »
 
+fos_user:
+    resource: "@FOSUserBundle/Resources/config/routing/all.xml"
+
 fos_user_security:
     resource: "@FOSUserBundle/Resources/config/routing/security.xml"
     prefix:   /
