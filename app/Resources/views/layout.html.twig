@@ -16,17 +16,18 @@
     <div id="header" class="jumbotron">
       <h1>Ma plateforme d'annonces</h1>
     </div>
-{% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
-    Bienvenue {{ app.user.username }}
-    -
-    <a href="{{ path('fos_user_security_logout') }}">Se déconnecter</a>
-{% else %}
-    <a href="{{ path('fos_user_registration_register') }}">Créer un compte</a>
-    <br />
-    <a href="{{ path('fos_user_security_login') }}">Se connecter</a>
-{% endif %}
     <div class="row">
       <div id="menu" class="col-md-3">
+        <h3>Menu utilisateurs</h3>
+        <ul class="nav nav-pills nav-stacked">
+        {% if is_granted("IS_AUTHENTICATED_REMEMBERED") %}
+          <li>Bienvenue {{ app.user.username }} </li>
+          <li><a href="{{ path('fos_user_security_logout') }}">Se déconnecter</a><li>
+        {% else %}
+          <li><a href="{{ path('fos_user_registration_register') }}">Créer un compte</a></li>
+          <li><a href="{{ path('fos_user_security_login') }}">Se connecter</a></li>
+        {% endif %}
+        </ul>
         <h3>Les annonces</h3>
         <ul class="nav nav-pills nav-stacked">
           <li><a href="{{ path('oc_platform_home') }}">Accueil</a></li>
