@@ -12,8 +12,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-use OC\PlatformBundle\Validator\Antiflood;
-use OC\PlatformBundle\Validator\AntifloodValidator;
+
 
 /**
  * Advert
@@ -62,7 +61,6 @@ class Advert
      *
      * @ORM\Column(name="content", type="text")
      * @Assert\NotBlank()
-     * @Antiflood()
      */
     private $content;
 
@@ -83,7 +81,7 @@ class Advert
     /**
      * @ORM\ManyToMany(targetEntity="OC\PlatformBundle\Entity\Category", cascade={"persist"})
      */
-    private $categories;
+    public $categories;
 
     /**
      * @ORM\OneToMany(targetEntity="OC\PlatformBundle\Entity\Application", mappedBy="advert")

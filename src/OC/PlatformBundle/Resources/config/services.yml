@@ -1,11 +1,6 @@
 # src/OC/PlatformBundle/Resources/config/services.yml
 
 services:
-    oc_platform.validator.antiflood:
-        class: OC\PlatformBundle\Validator\AntifloodValidator
-        arguments: ['@request_stack', '@doctrine.orm.entity_manager']
-        tags:
-            - { name: validator.constraint_validator, alias: oc_platform_antiflood }
     oc_platform.antispam:
         class:     OC\PlatformBundle\Antispam\OCAntispam
         arguments: ['@mailer', '50']
