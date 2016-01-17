@@ -18,13 +18,6 @@ services:
         arguments: ['@mailer']
         tags:
             - { name: doctrine.event_listener, event: postPersist }
-    oc_platform.beta.html:
-        class: OC\PlatformBundle\Beta\BetaHTML
-    oc_platform.beta.listener:
-        class: OC\PlatformBundle\Beta\BetaListener
-        arguments: ['@oc_platform.beta.html', '"2016-01-20"']
-        tags:
-            - { name: kernel.event_listener, event: kernel.response, method: processBeta, priority: 2 }
     oc_platform.censorship_processor:
         class:     OC\PlatformBundle\Bigbrother\CensorshipProcessor
         arguments: ['@mailer']
