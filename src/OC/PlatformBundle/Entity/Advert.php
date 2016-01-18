@@ -12,7 +12,7 @@ use Gedmo\Mapping\Annotation as Gedmo;
 use Symfony\Component\Validator\Constraints as Assert;
 use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
-
+use OC\UserBundle\Entity\User;
 
 /**
  * Advert
@@ -48,13 +48,6 @@ class Advert
      */
     private $title;
 
-    /**
-     * @var string
-     *
-     * @ORM\Column(name="author", type="string", length=255)
-     * @Assert\Length(min=2)
-     */
-    private $author;
 
     /**
      * @var string
@@ -100,7 +93,11 @@ class Advert
      * @ORM\Column(name="updated_at", type="datetime", nullable=true)
      */
      private $updatedAt;
-
+    /**
+     * @ORM\ManyToOne(targetEntity="OC\UserBundle\Entity\User")
+     * @@ORM\JoinColumn(name="author_id", referencedColumnName="id")
+     */
+    private $author;
     /**
      * @ORM\Column(name="nb_applications", type="integer")
      */
@@ -112,17 +109,47 @@ class Advert
      */
     private $slug;
 
+
+    /**
+     * @Assert\IsTrue()
+     */
+    public function isTitle()
+    {
+      return false;
+    }
+
+    /**
+     * @Assert\Callback
+     */
+    public function isContentValid(ExecutionContextInterface $context)
+    {
+      $forbiddenWords = array('échec', 'abandon');
+
+      //on vérifie que le contenu ne contient pas l'un des mots
+      if (preg_match('#'.implode('|', $forbiddenWords).'#', $this->getContent())) {
+        //la règle est violée, on définit l'erreur
+        $context
+          ->buildViolation('Contenu invalide car il contient un mot interdit.') //message
+          ->atPath('content') //attribut de l'objet qui est violé
+          ->addViolation() //déclenche l'erreur
+        ;
+      }
+    }
+    /**
+     * Constructor
+     */
     public function __construct()
     {
-      $this->date = new \Datetime();
-      $this->categories = new ArrayCollection();
-      $this->applications = new ArrayCollection();
+        $this->date = new \DateTime();
+        $this->categories = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->applications = new \Doctrine\Common\Collections\ArrayCollection();
+        $this->skills = new \Doctrine\Common\Collections\ArrayCollection();
     }
 
     /**
      * Get id
      *
-     * @return int
+     * @return integer
      */
     public function getId()
     {
@@ -139,6 +166,7 @@ class Advert
     public function setDate($date)
     {
         $this->date = $date;
+
         return $this;
     }
 
@@ -162,6 +190,7 @@ class Advert
     public function setTitle($title)
     {
         $this->title = $title;
+
         return $this;
     }
 
@@ -176,29 +205,6 @@ class Advert
     }
 
     /**
-     * Set author
-     *
-     * @param string $author
-     *
-     * @return Advert
-     */
-    public function setAuthor($author)
-    {
-        $this->author = $author;
-        return $this;
-    }
-
-    /**
-     * Get author
-     *
-     * @return string
-     */
-    public function getAuthor()
-    {
-        return $this->author;
-    }
-
-    /**
      * Set content
      *
      * @param string $content
@@ -208,6 +214,7 @@ class Advert
     public function setContent($content)
     {
         $this->content = $content;
+
         return $this;
     }
 
@@ -231,6 +238,7 @@ class Advert
     public function setPublished($published)
     {
         $this->published = $published;
+
         return $this;
     }
 
@@ -245,6 +253,78 @@ class Advert
     }
 
     /**
+     * Set updatedAt
+     *
+     * @param \DateTime $updatedAt
+     *
+     * @return Advert
+     */
+    public function setUpdatedAt($updatedAt)
+    {
+        $this->updatedAt = $updatedAt;
+
+        return $this;
+    }
+
+    /**
+     * Get updatedAt
+     *
+     * @return \DateTime
+     */
+    public function getUpdatedAt()
+    {
+        return $this->updatedAt;
+    }
+
+    /**
+     * Set nbApplications
+     *
+     * @param integer $nbApplications
+     *
+     * @return Advert
+     */
+    public function setNbApplications($nbApplications)
+    {
+        $this->nbApplications = $nbApplications;
+
+        return $this;
+    }
+
+    /**
+     * Get nbApplications
+     *
+     * @return integer
+     */
+    public function getNbApplications()
+    {
+        return $this->nbApplications;
+    }
+
+    /**
+     * Set slug
+     *
+     * @param string $slug
+     *
+     * @return Advert
+     */
+    public function setSlug($slug)
+    {
+        $this->slug = $slug;
+
+        return $this;
+    }
+
+    /**
+     * Get slug
+     *
+     * @return string
+     */
+    public function getSlug()
+    {
+        return $this->slug;
+    }
+
+    /**
      * Set image
      *
      * @param \OC\PlatformBundle\Entity\Image $image
@@ -254,6 +334,7 @@ class Advert
     public function setImage(\OC\PlatformBundle\Entity\Image $image = null)
     {
         $this->image = $image;
+
         return $this;
     }
 
@@ -277,6 +358,7 @@ class Advert
     public function addCategory(\OC\PlatformBundle\Entity\Category $category)
     {
         $this->categories[] = $category;
+
         return $this;
     }
 
@@ -311,8 +393,6 @@ class Advert
     {
         $this->applications[] = $application;
 
-        //on lie l'annonce à la candidature
-        $application->setAdvert($this);
         return $this;
     }
 
@@ -324,9 +404,6 @@ class Advert
     public function removeApplication(\OC\PlatformBundle\Entity\Application $application)
     {
         $this->applications->removeElement($application);
-
-        //si la relation était facultative (nullable=true, ce qui n'est pas le cas ici) :
-        //$application->setAdvert(null);
     }
 
     /**
@@ -337,93 +414,6 @@ class Advert
     public function getApplications()
     {
         return $this->applications;
-    }
-
-    /**
-     * @ORM\PreUpdate
-     */
-    public function updateDate()
-    {
-        $this->setUpdatedAt(new \DateTime());
-    }
-
-    /**
-     * Set updatedAt
-     *
-     * @param \DateTime $updatedAt
-     *
-     * @return Advert
-     */
-    public function setUpdatedAt(\DateTime $updatedAt)
-    {
-        $this->updatedAt = $updatedAt;
-        return $this;
-    }
-
-    /**
-     * Get updatedAt
-     *
-     * @return \DateTime
-     */
-    public function getUpdatedAt()
-    {
-        return $this->updatedAt;
-    }
-
-    /**
-     * Set nbApplications
-     *
-     * @param integer $nbApplications
-     *
-     * @return Advert
-     */
-    public function setNbApplications($nbApplications)
-    {
-        $this->nbApplications = $nbApplications;
-        return $this;
-    }
-
-    /**
-     * Get nbApplications
-     *
-     * @return integer
-     */
-    public function getNbApplications()
-    {
-        return $this->nbApplications;
-    }
-
-    public function increaseApplication()
-    {
-      $this->nbApplications++;
-    }
-
-    public function decreaseApplication()
-    {
-      $this->nbApplications--;
-    }
-
-    /**
-     * Set slug
-     *
-     * @param string $slug
-     *
-     * @return Advert
-     */
-    public function setSlug($slug)
-    {
-        $this->slug = $slug;
-        return $this;
-    }
-
-    /**
-     * Get slug
-     *
-     * @return string
-     */
-    public function getSlug()
-    {
-        return $this->slug;
     }
 
     /**
@@ -461,28 +451,26 @@ class Advert
     }
 
     /**
-     * @Assert\IsTrue()
+     * Set author
+     *
+     * @param \OC\UserBundle\Entity\User $author
+     *
+     * @return Advert
      */
-    public function isTitle()
+    public function setAuthor(\OC\UserBundle\Entity\User $author = null)
     {
-      return false;
+        $this->author = $author;
+
+        return $this;
     }
 
     /**
-     * @Assert\Callback
+     * Get author
+     *
+     * @return \OC\UserBundle\Entity\User
      */
-    public function isContentValid(ExecutionContextInterface $context)
+    public function getAuthor()
     {
-      $forbiddenWords = array('échec', 'abandon');
-
-      //on vérifie que le contenu ne contient pas l'un des mots
-      if (preg_match('#'.implode('|', $forbiddenWords).'#', $this->getContent())) {
-        //la règle est violée, on définit l'erreur
-        $context
-          ->buildViolation('Contenu invalide car il contient un mot interdit.') //message
-          ->atPath('content') //attribut de l'objet qui est violé
-          ->addViolation() //déclenche l'erreur
-        ;
-      }
+        return $this->author;
     }
 }
