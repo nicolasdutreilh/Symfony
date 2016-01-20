@@ -14,6 +14,7 @@ use Symfony\Component\Validator\Context\ExecutionContextInterface;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use OC\UserBundle\Entity\User;
 
+
 /**
  * Advert
  * @ORM\Entity(repositoryClass="OC\PlatformBundle\Entity\AdvertRepository")
