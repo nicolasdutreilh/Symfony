@@ -16,6 +16,7 @@ use OC\PlatformBundle\Entity\Skill;
 use OC\PlatformBundle\Entity\AdvertSkill;
 use OC\PlatformBundle\Form\AdvertType;
 use OC\PlatformBundle\Form\AdvertEditType;
+use OC\UserBundle\Entity\User;
 use Symfony\Component\Security\Core\Exception\AccessDeniedException;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Security;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\ParamConverter;
@@ -85,6 +86,7 @@ class AdvertController extends Controller
   public function addAction(Request $request)
   {
     $advert = new Advert();
+    $advert->setAuthor($this->container->get('security.token_storage')->getToken()->getUser());
     $form = $this->createForm(AdvertType::class, $advert);
 
 
@@ -180,29 +182,6 @@ class AdvertController extends Controller
     );
 
     return $this->render('OCPlatformBundle:Advert:menu.html.twig', array('listAdverts' => $listAdverts));
-  }
-
-  public function testAction()
-  {
-    $advert = new Advert;
-
-    $advert->setDate(new \Datetime());  // Champ « date » OK
-    $advert->setTitle('abc');           // Champ « title » incorrect : moins de 10 caractères
-    //$advert->setContent('blabla');    // Champ « content » incorrect : on ne le définit pas
-    $advert->setAuthor('A');            // Champ « author » incorrect : moins de 2 caractères
-
-    // On récupère le service validator
-    $validator = $this->get('validator');
-
-    // On déclenche la validation sur notre object
-    $listErrors = $validator->validate($advert);
-
-    // Si le tableau n'est pas vide, on affiche les erreurs
-    if(count($listErrors) > 0) {
-      return new Response(print_r($listErrors, true));
-    } else {
-      return new Response("L'annonce est valide !");
-    }
   }
 
   public function translationAction($name)
