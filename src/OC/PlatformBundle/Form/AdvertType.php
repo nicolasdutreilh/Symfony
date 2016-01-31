@@ -26,7 +26,7 @@ class AdvertType extends AbstractType
       ->add('date',       DateType::class)
       ->add('title',      TextType::class)
       ->add('content',    TextareaType::class)
-      ->add('image',      ImageType::class)
+      //->add('image',      ImageType::class)
       ->add('categories', EntityType::class, array(
       'class'             => 'OCPlatformBundle:Category',
       'choice_label'      => 'name',
